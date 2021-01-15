@@ -1,0 +1,94 @@
+---
+title: "Sierra Amphibians"
+author: "Bri Baker"
+date: "1/14/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE)
+
+library(tidyverse)
+library(patchwork)
+library(here)
+library(readxl)
+library(lubridate)
+library(wesanderson)
+library(directlabels)
+library(ggtext)
+
+```
+
+## Summary
+
+The following is a data visualization of yellow-legged frog (*Rana muscosa*) in the Sierras from 1995-2002 based off of the Sierra Lakes Inventory Project dataset.
+
+From the Environmental Data Initiative repository: “The Sierra Lakes Inventory Project (SLIP) was a research endeavor that ran from 1995-2002 and has supported research and management of Sierra Nevada aquatic ecosystems and their terrestrial interfaces. We described the physical characteristics of and surveyed aquatic communities for > 8,000 lentic water bodies in the southern Sierra Nevada, including lakes, ponds, marshes, and meadows” (Knapp et al., 2020)
+
+```{r load data}
+sierra_amphibians <- read_excel(here("data", "sierra_amphibians.xlsx")) %>% 
+  mutate(across(where(is.character), tolower), # make data lowercase
+         survey_date = ymd(survey_date), # date formatting
+         year = year(survey_date)) # make year column
+```
+
+
+## Data Visualization
+
+```{r ramu annual counts}
+ramu <- sierra_amphibians %>% # start with initial dataset
+  filter(amphibian_species == "ramu", # filter by species for Rana muscosa
+         amphibian_life_stage != "eggmass") %>%  # exclude egg mass life stage
+  count(year, amphibian_life_stage, name = "count") # life stage counts per year
+
+
+ts_ramu <- ggplot(data = ramu, aes(x = year, y = count)) + # save basic ggplot structure of ramu
+  geom_line(aes(color = amphibian_life_stage),  # line graph
+            show.legend = F) + # no legend
+  scale_color_manual(values = wes_palette(n = 3,  # use color palette from wesanderson
+                                        name = "Moonrise3")) +
+  labs(y = "Count of individuals",
+       x = "Year") + # add labels
+  scale_x_continuous(limits = c(1996, 2003)) + # set x axis limits
+  theme_classic() + # use classic theme
+  geom_dl(aes(label = amphibian_life_stage), method = list(cex = 0.75, dl.trans(x = x + .2), "last.points")) # label lines
+
+
+```
+
+
+```{r ramu top 5 aggregate counts}
+ramu_lakes <- sierra_amphibians %>% # start with initial dataset
+  filter(amphibian_species == "ramu", # filter by species for Rana muscosa
+         amphibian_life_stage != c("eggmass", "tadpole")) %>%  # exclude egg mass life stage
+  count(lake_id, wt = amphibian_number, name = "count") %>%  # life stage counts per year
+  mutate(lake_id = paste("Lake", lake_id)) %>% 
+  slice_max(count, n = 5)
+
+top5_ramu <- ggplot(data = ramu_lakes, (aes(x = fct_reorder(lake_id, count), y = count))) +
+  geom_col(aes(fill = lake_id),  # line graph
+           show.legend = F) +
+  scale_fill_manual(values = wes_palette(n = 5,  # use color palette from wesanderson
+                                         name = "Moonrise3")) +
+  labs(y = "Count of individuals",
+       x = "") + # add labels
+  theme_classic() # use classic theme
+
+```
+
+
+```{r patchwork figure}
+
+ts_ramu/top5_ramu # use patchwork to create compound figure
+
+```
+
+**Figure 1.** Summary of yellow-legged frog (*Rana muscosa*) counts in Sierra Lakes Inventory Project from 1995-2002. Count of individuals for all lakes across survey years (top). Lakes with 5 largest aggregated annual counts of adult and subadults (bottom).
+
+
+
+## Data Citation
+
+Knapp, R.A., C. Pavelka, E.E. Hegeman, and T.C. Smith. 2020. The Sierra Lakes Inventory Project: Non-Native fish and community composition of lakes and ponds in the Sierra Nevada, California ver 2. Environmental Data Initiative. https://doi.org/10.6073/pasta/d835832d7fd00d9e4466e44eea87fab3
