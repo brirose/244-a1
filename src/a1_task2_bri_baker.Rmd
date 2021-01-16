@@ -1,0 +1,42 @@
+---
+title: "World Environmental Variables PCA"
+author: "Bri Baker"
+date: "1/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+```
+## Introduction
+
+SUMMARY HERE
+
+```{r}
+enviro <- read_csv(here("data", "world_env_vars.csv")) %>% 
+  clean_names()
+```
+# PCA
+
+```{r}
+
+env_pca <- enviro %>% 
+  
+  ### decide on variables
+  drop_na() %>% 
+  scale() %>% 
+  prcomp()
+
+
+```
+
+
+
+
+## Summary
+
+
+## Data Citation
