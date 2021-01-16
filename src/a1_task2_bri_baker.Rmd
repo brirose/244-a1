@@ -7,33 +7,43 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 library(tidyverse)
 library(here)
 library(janitor)
+library(ggfortify)
+
 ```
 ## Introduction
 
 SUMMARY HERE
 
-```{r}
+```{r load data}
 enviro <- read_csv(here("data", "world_env_vars.csv")) %>% 
   clean_names()
 ```
 # PCA
 
-```{r}
+```{r run pca}
 
-env_pca <- enviro %>% 
-  
-  ### decide on variables
-  drop_na() %>% 
-  scale() %>% 
-  prcomp()
+env_pca <- enviro %>% # start with whole dataset
+  select(accessibility_to_cities:cloudiness) %>% # select numeric variables 
+  drop_na() %>% # drop na
+  scale() %>%  # unify scale of variables
+  prcomp() # run pca
+
+
+autoplot(env_pca, # plot pca
+         loadings = T, # include loadings
+         loadings.label = T,
+         loadings.colour = 'blue',
+         loadings.label.size = 3,
+         loadings.label.repel = T,
+         loadings.label.colour = "blue") + # label loadings
+  theme_minimal()
 
 
 ```
-
-
 
 
 ## Summary
