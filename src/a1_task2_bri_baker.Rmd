@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 library(tidyverse)
 library(here)
@@ -14,15 +14,21 @@ library(janitor)
 library(ggfortify)
 
 ```
-## Introduction
 
-SUMMARY HERE
+## Summary
+
+The data utilized for the following principle components analysis (PCA) are environmental variables for the countries of Earth including variables like precipitation, temperature, ground cover, and elevation. These data are derived from publicly available remote sensing datasets, primarily derived by calculating the mean for each country at a reduction scale of about 10km (@zander_venter).
+
+Here, I will be exploring the relationships between these data and determining to what degree they describe the variance in the data.
+
 
 ```{r load data}
 enviro <- read_csv(here("data", "world_env_vars.csv")) %>% 
   clean_names()
 ```
 # PCA
+
+The following analysis helps to describe the variance and correlation in each variable of the dataset (Figure 1).
 
 ```{r run pca}
 
@@ -35,18 +41,28 @@ env_pca <- enviro %>% # start with whole dataset
 
 autoplot(env_pca, # plot pca
          loadings = T, # include loadings
-         loadings.label = T,
-         loadings.colour = 'blue',
-         loadings.label.size = 3,
-         loadings.label.repel = T,
-         loadings.label.colour = "blue") + # label loadings
-  theme_minimal()
+         loadings.colour = 'blue', # make loading blue
+         loadings.label = T, # show label for loadings
+                  loadings.label.size = 3.5, # adjust type size
+         loadings.label.repel = T, # make easier to read
+         loadings.label.colour = "darkblue") + # label loadings
+  theme_bw() # set theme
 
 
 ```
 
+**Figure 1.** PCA results for world country environmental dataset. X axis explains 38.26% of variance and y axis explains 25.05% of variance. The relative influence on variance of 27 environmental variables is shown by the loading arrows.
+
 
 ## Summary
 
+To summarize some of the takeaways from Figure 1:
 
-## Data Citation
+* The x axis explains 38.26% of variance in the dataset and y axis explains 25.05% of variance in the dataset
+* Temperature seasonality and isothermalty are inversely correlated
+* Rain wettest month and wettest quarter are highly correlated, as are the driest month and quarter
+* Wind and temperature seasonality are highly correlated, but temperature seasonality explains more variance than does wind
+* Rain seasonality and temperature annual range are unrelated
+
+## Data Source
+Data set compiled and provided by @zander_venter on Kaggle.
