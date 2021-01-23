@@ -62,7 +62,7 @@ ts_ramu <- ggplot(data = ramu, aes(x = year, y = count)) + # save basic ggplot s
 ```{r ramu top 5 aggregate counts}
 ramu_lakes <- sierra_amphibians %>% # start with initial dataset
   filter(amphibian_species == "ramu", # filter by species for Rana muscosa
-         amphibian_life_stage != c("eggmass", "tadpole")) %>%  # exclude egg mass life stage
+         !amphibian_life_stage %in% c("eggmass", "tadpole")) %>%  # exclude egg mass life stage
   count(lake_id, wt = amphibian_number, name = "count") %>%  # life stage counts per year
   mutate(lake_id = paste("Lake", lake_id)) %>% 
   slice_max(count, n = 5)
